@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const statusSchema = require('./status');
+const repoStatusSchema = require('./status');
+const Schema = mongoose.Schema;
 const releaseSchema = mongoose.Schema({
   id: {
     type: String,
@@ -37,12 +38,12 @@ const releaseSchema = mongoose.Schema({
     default: 0,
   },
   finalStatus: {
-    type: statusSchema,
-    default: () => new mongoose.model("Status", statusSchema)(),
+    type: repoStatusSchema.schema,
+    default: () => new mongoose.model("RepoStatus", repoStatusSchema)(),
   },
   statuses: [
     {
-      type: statusSchema
+      type: repoStatusSchema.schema
     }
   ],
   comments: [

@@ -1,57 +1,51 @@
 const express = require("express");
-const userSchema = require("../models/user");
+const statusSchema = require("../models/status");
 
 const router = express.Router();
 
-// create user
-router.post("/users", (req, res) => {
-  const user = userSchema(req.body);
-  user
-      .save()
-      .then((data) => res.json(data))
-      .catch((error) => {
-        console.error("Error saving user:", error);
-        res.json({ message: error });
-      });
+// create status
+router.post("/status", (req, res) => {
+  const status = statusSchema(req.body);
+  status
+    .save()
+    .then((data) => res.json(data))
+    .catch((error) => res.json({ message: error }));
 });
 
-// get all users
-router.get("/users", (req, res) => {
-  userSchema
+// get all status
+router.get("/status", (req, res) => {
+    statusSchema
     .find()
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// get a user
-router.get("/users/:id", (req, res) => {
+// get a status
+router.get("/status/:id", (req, res) => {
   const { id } = req.params;
-  userSchema
+  statusSchema
     .findById(id)
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// delete a user
-router.delete("/users/:id", (req, res) => {
+// delete a status
+router.delete("/status/:id", (req, res) => {
   const { id } = req.params;
-  userSchema
+  statusSchema
     .remove({ _id: id })
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// update a user
-/*
-router.put("/users/:id", (req, res) => {
+// update a status
+router.put("/status/:id", (req, res) => {
   const { id } = req.params;
   const { name, age, email } = req.body;
-  userSchema
+  statusSchema
     .updateOne({ _id: id }, { $set: { name, age, email } })
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-module.exports = router;
-*/
 module.exports = router;

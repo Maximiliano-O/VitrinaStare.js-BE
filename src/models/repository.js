@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-
+const Schema = mongoose.Schema;
+const statusSchema = require('./status');
 const repositorySchema = mongoose.Schema({
 
   repositoryID: {
@@ -29,16 +30,13 @@ const repositorySchema = mongoose.Schema({
     enum: ['public', 'private'],
     default: 'public',
   },
-  totalDownloads: {
-    type: Number,
-    default: 0,
-  },
+
   imageURL: {
     type: String,
     default: '',
   },
   lastStatus: {
-    type: statusSchema,
+    type: statusSchema.schema,
     required: true,
   },
   lastRealeaseDate: {
@@ -52,7 +50,7 @@ const repositorySchema = mongoose.Schema({
   ],
   repoDetails: {
     type: Schema.Types.ObjectId,
-    ref: "RepositoryDetails",
+    ref: "RepositoryDetail",
   },
   totalComments: {
     type: Number,

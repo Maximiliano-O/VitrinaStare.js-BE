@@ -1,20 +1,43 @@
-const express = require("express");y
+const express = require("express");
 const repositorySchema = require("../models/repository");
+
 
 const router = express.Router();
 
 // create repositorie
+const RepositoryDetail = require('../models/RepositoryDetail');
+
 router.post("/repositories", (req, res) => {
-  const repository = repositorySchema(req.body);
-  repository
-    .save()
-    .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error }));
+  // Create and save a new RepositoryDetail document
+  const repoDetail = new RepositoryDetail(req.body);
+  repoDetail
+      .save()
+      .then((savedRepoDetail) => {
+        // Create a new Repository document with the saved RepositoryDetail's _id
+        const repositoryData = {
+          ...req.body,
+
+          repoDetails: savedRepoDetail._id,
+        };
+        const repository = new Repository(repositoryData);
+
+        // Save the Repository document
+        return repository.save().then((savedRepository) => {
+          // Send the saved Repository and RepositoryDetail data in the response
+          res.json({
+            repository: savedRepository,
+            repositoryDetail: savedRepoDetail,
+          });
+        });
+      })
+      .catch((error) => {
+        res.json({ message: error });
+      });
 });
 
 // get all repositories
 router.get("/repositories", (req, res) => {
-  repositorieSchema
+  repositorySchema
     .find()
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
@@ -23,7 +46,7 @@ router.get("/repositories", (req, res) => {
 // get a repositories
 router.get("/repositories/:id", (req, res) => {
   const { id } = req.params;
-  repositorieSchema
+  repositorySchema
     .findById(id)
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
@@ -48,4 +71,26 @@ router.put("/rrepositories/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
+
+// get unique tags of all repositories
+router.get("/unique-tags", (req, res) => {
+  repositorySchema
+      .aggregate([
+        { $unwind: "$tags" },
+        { $group: { _id: null, uniqueTags: { $addToSet: "$tags" } } },
+      ])
+      .then((data) => res.json(data[0].uniqueTags))
+      .catch((error) => res.json({ message: error }));
+});
+
+// get all repositories by the same contributor
+router.get("/repositories/contributor/:contributorID", (req, res) => {
+  const { contributorID } = req.params;
+  repositorySchema
+      .find({ contributorID })
+      .then((data) => res.json(data))
+      .catch((error) => res.json({ message: error }));
+});
+
 module.exports = router;
+

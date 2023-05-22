@@ -1,57 +1,51 @@
 const express = require("express");
-const userSchema = require("../models/user");
+const repoDetailSchema = require("../models/repositoryDetail");
 
 const router = express.Router();
 
-// create user
-router.post("/users", (req, res) => {
-  const user = userSchema(req.body);
-  user
-      .save()
-      .then((data) => res.json(data))
-      .catch((error) => {
-        console.error("Error saving user:", error);
-        res.json({ message: error });
-      });
+// create repositoryDetail
+router.post("/repoDetail", (req, res) => {
+  const repoDetail = repoDetailSchema(req.body);
+  repoDetail
+    .save()
+    .then((data) => res.json(data))
+    .catch((error) => res.json({ message: error }));
 });
 
-// get all users
-router.get("/users", (req, res) => {
-  userSchema
+// get all repositoryDetail
+router.get("/repoDetail", (req, res) => {
+    repoDetailSchema
     .find()
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// get a user
-router.get("/users/:id", (req, res) => {
+// get a repositoryDetail
+router.get("/repoDetail/:id", (req, res) => {
   const { id } = req.params;
-  userSchema
+  repoDetailSchema
     .findById(id)
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// delete a user
-router.delete("/users/:id", (req, res) => {
+// delete a repositoryDetail
+router.delete("/repoDetail/:id", (req, res) => {
   const { id } = req.params;
-  userSchema
+  repoDetailSchema
     .remove({ _id: id })
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// update a user
-/*
-router.put("/users/:id", (req, res) => {
+// update a repositoryDetail
+router.put("/repoDetail/:id", (req, res) => {
   const { id } = req.params;
   const { name, age, email } = req.body;
-  userSchema
+  repoDetailSchema
     .updateOne({ _id: id }, { $set: { name, age, email } })
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-module.exports = router;
-*/
 module.exports = router;

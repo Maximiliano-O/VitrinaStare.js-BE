@@ -1,25 +1,35 @@
 const mongoose = require("mongoose");
 
+const statusSchema = require('./status');
+const releaseSchema = require('./release');
+const Schema = mongoose.Schema;
+
 const repositoryDetailSchema = mongoose.Schema({
   repositoryName: {
     type: String,
     required: true
   },
   repositoryDesc: {
+    type: String,
+    default: ""
   },
   repositoryDoc:{
+    type: String,
+    default: ""
   },
   license: {
+    type: String,
+    default: "None"
   },
-  releases: [{type: releaseSchema}],
+  releases: [{type: releaseSchema.schema}],
   repositoryUrl: {
-      type: statusSchema,
+      type: statusSchema.schema,
       required: true,    
-  },
-  reviewers: {
-  },
-  contributorID: {
-  },
+  }
+  //reviewers: {
+  //},
+  //contributorID: {
+  //},
 
  
 },

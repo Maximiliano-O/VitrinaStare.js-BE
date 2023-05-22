@@ -6,11 +6,11 @@ const commentSchema = mongoose.Schema({
   required: true
   },
  repositoryID: {
-  type: mongoose.Schema.Types.ObjectId,
+  type: String,
   required: true
  },
  releaseID: {
-  type: mongoose.Schema.Types.ObjectId,
+  type: String,
   required: true
   },
   releaseTag: {
