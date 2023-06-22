@@ -5,7 +5,8 @@ const router = express.Router();
 
 // create comment
 router.post("/comments", (req, res) => {
-  const comment = userSchema(req.body);
+    console.log('Received comment data:', req.body);
+    const comment = commentSchema(req.body);
   comment
     .save()
     .then((data) => res.json(data))
@@ -33,12 +34,12 @@ router.get("/comments/:id", (req, res) => {
 router.get('/comments/repository/:repositoryID', async (req, res) => {
     const repositoryID = req.params.repositoryID;
     try {
-      const comments = await getCommentsByRepositoryID(repositoryID);
-      res.json(comments);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+        const data = await commentSchema.find({ repositoryID: repositoryID });
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-  });
+});
 
 
   // get all comments by authorID

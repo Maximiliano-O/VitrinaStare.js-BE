@@ -4,6 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 const userRoute = require("./routes/user");
 const repositoryRoute = require("./routes/repository");
+const commentRoute = require("./routes/comment");
 
 // settings
 const app = express();
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api", userRoute);
 app.use("/api", repositoryRoute);
+app.use("/api", commentRoute);
 
 // routes
 app.get("/", (req, res) => {

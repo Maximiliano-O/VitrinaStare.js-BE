@@ -39,7 +39,7 @@ const repositorySchema = mongoose.Schema({
     type: statusSchema.schema,
     required: true,
   },
-  lastRealeaseDate: {
+  lastReleaseDate: {
     type: Date,
     default: Date.now,
   },

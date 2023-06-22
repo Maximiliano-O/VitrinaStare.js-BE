@@ -7,16 +7,15 @@ const contributorSchema = mongoose.Schema({
     required: true,
   },
   imageURL: {
-    type: String,
-    required: true,
+    type: String
+
   },
   latestPost: {
     type: String,
     default: '',
   },
   profileURL: {
-    type: String,
-    required: true,
+    type: String
   },
   totalComments: {
     type: Number,
