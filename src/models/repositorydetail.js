@@ -21,11 +21,20 @@ const repositoryDetailSchema = mongoose.Schema({
     type: String,
     default: "None"
   },
-  releases: [{type: releaseSchema.schema}],
-  repositoryUrl: {
-      type: statusSchema.schema,
-      required: true,    
-  }
+  //releases: [{type: releaseSchema.schema}],
+
+
+  //repositoryUrl: {
+  //    type: statusSchema.schema,
+  //    required: true,
+  //},
+      repositoryUrl: {
+        type: String,
+        required: true
+      },
+
+
+
   //reviewers: {
   //},
   //contributorID: {

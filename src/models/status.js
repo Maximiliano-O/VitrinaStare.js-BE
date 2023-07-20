@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const repoStatusSchema = mongoose.Schema({
   releaseID: {
-    type: Number,
+    type: String,
     required: true
   },
   reviewerID: {
@@ -25,8 +25,8 @@ const repoStatusSchema = mongoose.Schema({
   },
   reviewDate: {
     type: Date,
-    default: null,
-    required: true
+    default: Date.now
+    //required: true
   },
 
  

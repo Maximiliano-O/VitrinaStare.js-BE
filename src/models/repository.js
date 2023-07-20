@@ -3,19 +3,19 @@ const Schema = mongoose.Schema;
 const statusSchema = require('./status');
 const repositorySchema = mongoose.Schema({
 
-  repositoryID: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+  //repositoryID: {
+  //  type: String,
+  //  required: true,
+  //  unique: true,
+  //},
   contributorID: {
     type: String,
     required: true,
   },
-  ownerID: {
-    type: String,
-    required: true,
-  },
+  //ownerID: {
+  //  type: String,
+  //  required: true,
+  //},
   author: {
     type: String,
     required: true,
@@ -35,10 +35,10 @@ const repositorySchema = mongoose.Schema({
     type: String,
     default: '',
   },
-  lastStatus: {
-    type: statusSchema.schema,
-    required: true,
-  },
+  //lastStatus: {
+  //  type: statusSchema.schema,
+  //  required: true,
+  //},
   lastReleaseDate: {
     type: Date,
     default: Date.now,
