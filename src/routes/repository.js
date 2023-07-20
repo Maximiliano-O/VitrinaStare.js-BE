@@ -4,7 +4,7 @@ const repositorySchema = require("../models/repository");
 
 const router = express.Router();
 
-// create repositorie
+// create repository
 const RepositoryDetail = require('../models/RepositoryDetail');
 
 router.post("/repositories", (req, res) => {
@@ -19,7 +19,7 @@ router.post("/repositories", (req, res) => {
 
           repoDetails: savedRepoDetail._id,
         };
-        const repository = new Repository(repositoryData);
+        const repository = new repositorySchema(repositoryData);
 
         // Save the Repository document
         return repository.save().then((savedRepository) => {
@@ -62,7 +62,7 @@ router.delete("/repositories/:id", (req, res) => {
 });
 
 // update a repository
-router.put("/rrepositories/:id", (req, res) => {
+router.put("/repositories/:id", (req, res) => {
   const { id } = req.params;
   const { name, age, email } = req.body;
   repositorySchema
