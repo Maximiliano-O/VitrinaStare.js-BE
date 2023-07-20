@@ -5,6 +5,9 @@ require("dotenv").config();
 const userRoute = require("./routes/user");
 const repositoryRoute = require("./routes/repository");
 const commentRoute = require("./routes/comment");
+const emailRouter = require("./routes/emailRouter");
+const statusRoute = require("./routes/status");
+const releaseRoute = require("./routes/release");
 
 // settings
 const app = express();
@@ -16,6 +19,9 @@ app.use(express.json());
 app.use("/api", userRoute);
 app.use("/api", repositoryRoute);
 app.use("/api", commentRoute);
+app.use("/api", emailRouter);
+app.use("/api", statusRoute);
+app.use("/api", releaseRoute);
 
 // routes
 app.get("/", (req, res) => {
@@ -25,7 +31,7 @@ app.get("/", (req, res) => {
 // mongodb connection
 mongoose
   //.connect(process.env.MONGODB_URI)
-  .connect('mongodb://localhost:27017/stare')
+  .connect('mongodb://0.0.0.0:27017/stare')
   .then(() => console.log("Connected to MongoDB Atlas"))
   .catch((error) => console.error(error));
 
