@@ -33,6 +33,19 @@ const releaseSchema = mongoose.Schema({
     type: String,
     default: '',
   },
+
+  verified: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  statuses: [repoStatusSchema],
+
+  //statuses: {
+  //  type: [repoStatusSchema], // This line means that 'statuses' is an array of 'statusSchema' objects
+  //  default: []
+  //}
+
   //totalComments: {
   //  type: Number,
   //  default: 0,

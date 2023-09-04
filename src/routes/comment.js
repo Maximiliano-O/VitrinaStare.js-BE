@@ -46,29 +46,35 @@ router.get('/comments/repository/:repositoryID', async (req, res) => {
 router.get('/comments/author/:authorID', async (req, res) => {
     const authorID = req.params.authorID;
     try {
-      const comments = await getCommentsByAuthorID(authorID);
-      res.json(comments);
+        const comments = await commentSchema.find({ authorID: authorID });
+        res.json(comments);
     } catch (err) {
-      res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err.message });
     }
-  });
+});
+
 // delete a comment
 router.delete("/comments/:id", (req, res) => {
-  const { id } = req.params;
-  commentsSchema
-    .remove({ _id: id })
-    .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error }));
+    const { id } = req.params;
+    commentSchema
+        .remove({ _id: id })
+        .then((data) => res.json(data))
+        .catch((error) => res.json({ message: error }));
 });
 
-// update a comments
-router.put("/comments/:id", (req, res) => {
-  const { id } = req.params;
-  const { name, age, email } = req.body;
-  commentSchema
-    .updateOne({ _id: id }, { $set: { name, age, email } })
-    .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error }));
+// update a comment
+router.put("/comments/:id", async (req, res) => {
+    const { id } = req.params;
+    const { authorID, repositoryID, repoName, username, body } = req.body;
+    try {
+        const updatedComment = await commentSchema.findOneAndUpdate(
+            { _id: id },
+            { $set: { authorID, repositoryID, repoName, username, body } },
+            { new: true }
+        );
+        res.json(updatedComment);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
-
 module.exports = router;

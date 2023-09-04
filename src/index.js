@@ -8,6 +8,7 @@ const commentRoute = require("./routes/comment");
 const emailRouter = require("./routes/emailRouter");
 const statusRoute = require("./routes/status");
 const releaseRoute = require("./routes/release");
+const repoV2Route = require("./routes/repoV2");
 
 // settings
 const app = express();
@@ -22,6 +23,7 @@ app.use("/api", commentRoute);
 app.use("/api", emailRouter);
 app.use("/api", statusRoute);
 app.use("/api", releaseRoute);
+app.use("/api", repoV2Route);
 
 // routes
 app.get("/", (req, res) => {

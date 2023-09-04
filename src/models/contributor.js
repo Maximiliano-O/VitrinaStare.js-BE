@@ -26,12 +26,7 @@ const contributorSchema = mongoose.Schema({
     type: Number,
     default: 0,
     min: 0,
-  },
-  downloads: {
-    type: Number,
-    default: 0,
-    min: 0,
-  },
+  }
 },
 {timestamps: true}
 );

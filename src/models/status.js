@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const repoStatusSchema = mongoose.Schema({
+const repoStatusSchema = new mongoose.Schema({
   releaseID: {
     type: String,
     required: true
@@ -26,7 +26,7 @@ const repoStatusSchema = mongoose.Schema({
   reviewDate: {
     type: Date,
     default: Date.now
-    //required: true
+
   },
 
  
@@ -34,4 +34,5 @@ const repoStatusSchema = mongoose.Schema({
 {timestamps: true}
 );
 
-module.exports = mongoose.model('RepoStatus', repoStatusSchema);
+
+module.exports = repoStatusSchema;

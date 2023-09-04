@@ -5,6 +5,7 @@ const releaseSchema = require('./release');
 const Schema = mongoose.Schema;
 
 const repositoryDetailSchema = mongoose.Schema({
+
   repositoryName: {
     type: String,
     required: true
@@ -45,4 +46,5 @@ const repositoryDetailSchema = mongoose.Schema({
 {timestamps: true}
 );
 
-module.exports = mongoose.model('RepositoryDetail', repositoryDetailSchema);
+//module.exports = mongoose.model('RepositoryDetail', repositoryDetailSchema);
+module.exports =repositoryDetailSchema;

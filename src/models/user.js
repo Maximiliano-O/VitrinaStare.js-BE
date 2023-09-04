@@ -2,13 +2,14 @@ const mongoose = require("mongoose");
 const contributorSchema = require('./contributor');
 const bcrypt = require('bcrypt');
 const userSchema = mongoose.Schema({
- userID: {
-  type: String,
-  unique: true,
-  index: true,
-  required: true
+ //userID: {
+ // type: String,
+ // unique: true,
+ // index: true,
+ // required: true
     
-  },
+ // },
+
   email: {
     type: String,
     required: true

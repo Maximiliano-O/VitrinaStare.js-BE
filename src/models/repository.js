@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const statusSchema = require('./status');
+const contributorSchema = require("./contributor");
 const repositorySchema = mongoose.Schema({
 
   //repositoryID: {
@@ -8,6 +9,8 @@ const repositorySchema = mongoose.Schema({
   //  required: true,
   //  unique: true,
   //},
+
+
   contributorID: {
     type: String,
     required: true,
@@ -48,14 +51,32 @@ const repositorySchema = mongoose.Schema({
       type: String,
     },
   ],
-  repoDetails: {
-    type: Schema.Types.ObjectId,
-    ref: "RepositoryDetail",
-  },
+  //repoDetails: {
+  //  type: Schema.Types.ObjectId,
+  //  ref: "RepositoryDetail",
+  //},
+      repoDetails: {
+        type: contributorSchema,
+        _id: false,
+        required: true
+      },
   totalComments: {
     type: Number,
     default: 0,
   },
+
+      ratings: [{
+        userId: {
+          type: String,
+          required: true,
+        },
+        rating: {
+          type: Number,
+          required: true,
+          min: 1,
+          max: 5,
+        },
+      }],
   totalRating: {
     type: Number,
     default: 0,

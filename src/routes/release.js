@@ -3,17 +3,17 @@ const releaseSchema = require("../models/release");
 
 const router = express.Router();
 
-// create comment
+// create release
 router.post("/release", (req, res) => {
-    console.log('Received comment data:', req.body);
-    const comment = releaseSchema(req.body);
-  comment
+    console.log('Received release data:', req.body);
+    const release = new releaseSchema(req.body);
+  release
     .save()
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// get all comment
+// get all releases
 router.get("/release", (req, res) => {
   releaseSchema
     .find()
@@ -21,7 +21,7 @@ router.get("/release", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// get a comment
+// get a release given it's id
 router.get("/release/:id", (req, res) => {
   const { id } = req.params;
   releaseSchema
@@ -30,8 +30,15 @@ router.get("/release/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-
-// delete a comment
+// get all releases of one repository
+router.get("/release/repository/:repositoryID", (req, res) => {
+    const { repositoryID } = req.params;
+    releaseSchema
+        .find({ repositoryID })
+        .then((data) => res.json(data))
+        .catch((error) => res.json({ message: error }));
+});
+// delete a release
 router.delete("/release/:id", (req, res) => {
   const { id } = req.params;
   releaseSchema
@@ -40,8 +47,8 @@ router.delete("/release/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// update a comments
-router.put("/comments/:id", (req, res) => {
+// update a release
+router.put("/release/:id", (req, res) => {
   const { id } = req.params;
   const { name, age, email } = req.body;
   releaseSchema
@@ -68,11 +75,47 @@ router.post("/releases/:id/statuses", (req, res) => {
         .catch((error) => res.json({ message: error }));
 });
 
-router.get("/release/:repositoryID", (req, res) => {
-    const { repositoryID } = req.params;
-    releaseSchema
-        .find({ repositoryID: repositoryID })
-        .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }));
+//router.get("/release/:repositoryID", (req, res) => {
+//    const { repositoryID } = req.params;
+//    releaseSchema
+//        .find({ repositoryID: repositoryID })
+//        .then((data) => res.json(data))
+//        .catch((error) => res.json({ message: error }));
+//});
+
+//Add status to the status list of a specific release
+router.post('/release/:id/status', async (req, res) => {
+    const newStatus = req.body; // Access the status data directly from req.body
+
+    try {
+        // Find the release by ID and push new status into statuses
+        const release = await releaseSchema.findOneAndUpdate(
+            { _id: req.params.id },
+            { $push: { statuses: newStatus } },
+            { new: true } // return updated release
+        );
+
+        // Extract all the isSafe values
+        const isSafeValues = release.statuses.map(status => status.isSafe);
+
+        // Count how many are true
+        const countIsSafe = isSafeValues.reduce((sum, isSafe) => sum + (isSafe ? 1 : 0), 0);
+
+        // Verify if the true count is more than half of total status count
+        if (countIsSafe > release.statuses.length / 2) {
+            release.verified = true;
+        } else {
+            release.verified = false;
+        }
+
+        // Save updated release information
+        await release.save();
+
+        // Return the updated release data
+        res.json(release);
+    } catch (err) {
+        res.status(400).json('Error: ' + err);
+    }
 });
+
 module.exports = router;
