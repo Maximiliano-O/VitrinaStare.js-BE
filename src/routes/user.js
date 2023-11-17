@@ -97,6 +97,16 @@ router.post('/login', (req, res) => {
     });
 });
 */
+
+
+router.get("/users/email/:email", (req, res) => {
+    const { email } = req.params;
+    userSchema
+        .findOne({ email })
+        .select('-password')
+        .then((data) => res.json(data))
+        .catch((error) => res.json({ message: error }));
+});
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
