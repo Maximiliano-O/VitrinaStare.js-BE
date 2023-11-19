@@ -1,12 +1,12 @@
 const express = require("express");
-const repositorySchema = require("../models/repository");
+const repositorySchema = require("../oldModels/repository");
 
 
 const router = express.Router();
 
 // create repository
-const RepositoryDetail = require('../models/RepositoryDetail');
-const userSchema = require("../models/user");
+const RepositoryDetail = require('../oldModels/repositorydetail');
+const userSchema = require("../oldModels/user");
 
 //router.post("/repositories", (req, res) => {
   // Create and save a new RepositoryDetail document
@@ -35,7 +35,7 @@ const userSchema = require("../models/user");
 //        res.json({ message: error });
 //      });
 //});
-
+//Registrar un repositorio
 router.post("/repositories", (req, res) => {
     const repo = repositorySchema(req.body);
     repo
@@ -48,7 +48,7 @@ router.post("/repositories", (req, res) => {
 });
 
 
-// get all repositories
+// Obtener todos los repositorios
 router.get("/repositories", (req, res) => {
   repositorySchema
     .find()
@@ -56,7 +56,7 @@ router.get("/repositories", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// get a repositories
+// Obtener un repositorio específico
 router.get("/repositories/:id", (req, res) => {
   const { id } = req.params;
   repositorySchema
@@ -65,7 +65,7 @@ router.get("/repositories/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// delete a repository
+// Eliminar un repositorio
 router.delete("/repositories/:id", (req, res) => {
   const { id } = req.params;
   repositorySchema
@@ -74,7 +74,7 @@ router.delete("/repositories/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// update a repository
+// Actualizar un Repositorio
 router.put("/repositories/:id", (req, res) => {
   const { id } = req.params;
   const { name, age, email } = req.body;

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const User = require("../models/user");
+const User = require("../oldModels/user");
 
 // Get all contributors
 router.get('/contributors', async (req, res) => {

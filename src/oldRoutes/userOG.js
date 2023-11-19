@@ -1,48 +1,48 @@
 const express = require("express");
-const repoDetailSchema = require("../models/repositoryDetail");
+const userSchema = require("../oldModels/user");
 
 const router = express.Router();
 
-// create repositoryDetail
-router.post("/repoDetail", (req, res) => {
-  const repoDetail = repoDetailSchema(req.body);
-  repoDetail
+// create user
+router.post("/users", (req, res) => {
+  const user = userSchema(req.body);
+  user
     .save()
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// get all repositoryDetail
-router.get("/repoDetail", (req, res) => {
-    repoDetailSchema
+// get all users
+router.get("/users", (req, res) => {
+  userSchema
     .find()
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// get a repositoryDetail
-router.get("/repoDetail/:id", (req, res) => {
+// get a user
+router.get("/users/:id", (req, res) => {
   const { id } = req.params;
-  repoDetailSchema
+  userSchema
     .findById(id)
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// delete a repositoryDetail
-router.delete("/repoDetail/:id", (req, res) => {
+// delete a user
+router.delete("/users/:id", (req, res) => {
   const { id } = req.params;
-  repoDetailSchema
+  userSchema
     .remove({ _id: id })
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 });
 
-// update a repositoryDetail
-router.put("/repoDetail/:id", (req, res) => {
+// update a user
+router.put("/users/:id", (req, res) => {
   const { id } = req.params;
   const { name, age, email } = req.body;
-  repoDetailSchema
+  userSchema
     .updateOne({ _id: id }, { $set: { name, age, email } })
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));

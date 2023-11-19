@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
-const statusSchema = require('./status');
-const releaseSchema = require('./release');
+const statusSchema = require('../models/status');
+const releaseSchema = require('../models/release');
 const Schema = mongoose.Schema;
 
 const repositoryDetailSchema = mongoose.Schema({
