@@ -3,7 +3,8 @@ const statusSchema = require("../models/status");
 
 const router = express.Router();
 
-// create status
+// Crear un estado
+// (Estado es el estado de revision, cada release nuevo va a poseer un estado por cada usuario que le corresponda revisar el release)
 router.post("/status", (req, res) => {
   const status = statusSchema(req.body);
   status
@@ -12,7 +13,7 @@ router.post("/status", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// get all status
+// Obtener todos los estados
 router.get("/status", (req, res) => {
     statusSchema
     .find()
@@ -20,7 +21,7 @@ router.get("/status", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// get a status
+// Obtener un estado específico
 router.get("/status/:id", (req, res) => {
   const { id } = req.params;
   statusSchema
@@ -29,7 +30,7 @@ router.get("/status/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// delete a status
+// Eliminar un estado específico
 router.delete("/status/:id", (req, res) => {
   const { id } = req.params;
   statusSchema
@@ -38,14 +39,5 @@ router.delete("/status/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// update a status
-router.put("/status/:id", (req, res) => {
-  const { id } = req.params;
-  const { name, age, email } = req.body;
-  statusSchema
-    .updateOne({ _id: id }, { $set: { name, age, email } })
-    .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error }));
-});
 
 module.exports = router;

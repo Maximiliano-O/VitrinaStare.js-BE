@@ -3,7 +3,7 @@ const commentSchema = require("../models/comment");
 
 const router = express.Router();
 
-// create comment
+// Crear un comentario
 router.post("/comments", (req, res) => {
     console.log('Received comment data:', req.body);
     const comment = commentSchema(req.body);
@@ -13,7 +13,7 @@ router.post("/comments", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// get all comment
+// Obtener todos los comentarios
 router.get("/comments", (req, res) => {
   commentSchema
     .find()
@@ -21,7 +21,7 @@ router.get("/comments", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// get a comment
+// Obtener los comentarios
 router.get("/comments/:id", (req, res) => {
   const { id } = req.params;
   commentSchema
@@ -30,7 +30,7 @@ router.get("/comments/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
-// get all comments by repositoryID
+// Obtener los comentarios de un repositorio específico
 router.get('/comments/repository/:repositoryID', async (req, res) => {
     const repositoryID = req.params.repositoryID;
     try {
@@ -42,7 +42,7 @@ router.get('/comments/repository/:repositoryID', async (req, res) => {
 });
 
 
-  // get all comments by authorID
+// Obtener los comentarios de un usuario específico
 router.get('/comments/author/:authorID', async (req, res) => {
     const authorID = req.params.authorID;
     try {
@@ -53,7 +53,7 @@ router.get('/comments/author/:authorID', async (req, res) => {
     }
 });
 
-// delete a comment
+// Eliminar un Comentario
 router.delete("/comments/:id", (req, res) => {
     const { id } = req.params;
     commentSchema
@@ -62,7 +62,7 @@ router.delete("/comments/:id", (req, res) => {
         .catch((error) => res.json({ message: error }));
 });
 
-// update a comment
+// Actualizar un comentario
 router.put("/comments/:id", async (req, res) => {
     const { id } = req.params;
     const { authorID, repositoryID, repoName, username, body } = req.body;

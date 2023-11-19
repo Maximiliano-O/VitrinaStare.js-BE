@@ -12,7 +12,7 @@ router.post("/send-emails", (req, res) => {
     //    service: 'gmail',
     //    auth: {
     //        user: 'starejs.dashboard@gmail.com',
-    //        pass: 'ihatethat',
+    //        pass: 'password',
     //    },
     //});
 
