@@ -1,6 +1,7 @@
 const express = require("express");
 const userV2Schema = require("../models/userV2");
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
@@ -45,19 +46,7 @@ router.delete("/usersV2/:id", (req, res) => {
         .catch((error) => res.json({ message: error }));
 });
 
-// update a user
-/*
-router.put("/users/:id", (req, res) => {
-  const { id } = req.params;
-  const { name, age, email } = req.body;
-  userSchema
-    .updateOne({ _id: id }, { $set: { name, age, email } })
-    .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error }));
-});
 
-module.exports = router;
-*/
 
 
 // update a user
@@ -68,11 +57,11 @@ router.put("/usersV2/:id", (req, res) => {
         .then((data) => res.json(data))
         .catch((error) => res.json({ message: error }));
 });
-/*
+
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    userSchema.findOne({ email }, (error, user) => {
+    userV2Schema.findOne({ email }, (error, user) => {
         if (error) {
             console.error('Error finding user:', error);
             return res.status(500).json({ message: 'Internal server error' });
@@ -96,12 +85,12 @@ router.post('/login', (req, res) => {
         });
     });
 });
-*/
+
 
 
 router.get("/usersV2/email/:email", (req, res) => {
     const { email } = req.params;
-    userSchema
+    userV2Schema
         .findOne({ email })
         .select('-password')
         .then((data) => res.json(data))
@@ -111,7 +100,7 @@ router.post('/loginV2', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await userSchema.findOne({ email });
+        const user = await userV2Schema.findOne({ email });
 
         if (!user) {
             return res.json({ loggedIn: false });
@@ -128,6 +117,65 @@ router.post('/loginV2', async (req, res) => {
         console.error('Error:', error);
         return res.status(500).json({ message: 'Internal server error' });
     }
+});
+
+//fetch random ammount of users
+router.get("/usersV2/random/:id/:n", async (req, res) => {
+    const { id, n } = req.params;
+    try {
+        const users = await userV2Schema.aggregate([
+            { $match: { _id: { $ne: mongoose.Types.ObjectId(id) } } },
+            { $sample: { size: parseInt(n) } }
+        ]);
+        res.json(users);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+//Fetch github URL
+router.get("/usersV2/urlGithubProfile/:id", (req, res) => {
+    const { id } = req.params;
+    userV2Schema
+        .findById(id, 'urlGithubProfile') // This ensures only urlGithubProfile field is returned
+        .then((data) => res.json(data))
+        .catch((error) => res.json({ message: error }));
+});
+
+// Revisa si hay algun usuario en la db que tenga un url github específico.
+router.get("/usersV2/github/:githubUrl", async (req, res) => {
+    const githubUrl = decodeURIComponent(req.params.githubUrl);
+
+    try {
+        const user = await userV2Schema.findOne({ urlGithubProfile: githubUrl });
+
+        if (user) {
+            // User exists in database
+            res.json({ exists: true, user });
+        } else {
+            // User does not exist in database
+            res.json({ exists: false });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
+router.get("/usersV2/email/:email", (req, res) => {
+    const { email } = req.params;
+    userV2Schema
+        .findOne({ email: email })
+        .then((data) => {
+            if (data) {
+                res.json(data)
+            } else {
+                res.json({ message: 'No user found with this email' });
+            }
+        })
+        .catch((error) => res.json({ message: error }));
 });
 
 module.exports = router;

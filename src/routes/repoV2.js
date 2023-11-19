@@ -1,5 +1,6 @@
 const express = require("express");
 const repoV2Schema = require("../models/repoV2");
+const Release = require("../models/release");
 
 
 
@@ -125,6 +126,38 @@ router.put("/repoV2/:id", async (req, res) => {
         res.json(updatedUser);
     } catch (error) {
         res.status(500).json({ message: error });
+    }
+});
+
+
+router.get("/repoV2/contributor/:contributorID", (req, res) => {
+    const { contributorID } = req.params;
+    repoV2Schema
+        .find({ contributorID: contributorID })
+        .then((data) => res.json(data))
+        .catch((error) => res.json({ message: error }));
+});
+
+
+
+router.post("/repoV2/verify", async (req, res) => {
+    try {
+        // Get all the releases where verified = true
+        const verifiedReleases = await Release.find({ verified: true });
+
+        // Extract the repositoryIDs from the releases
+        const repositoryIDs = verifiedReleases.map(release => release.repositoryID);
+
+        // Update the repositories where the id is in repositoryIDs and verified = false
+        await repoV2Schema.updateMany(
+            { _id: { $in: repositoryIDs }, verified: false },
+            { $set: { verified: true } }
+        );
+
+        res.json({ message: 'Repositories verified successfully!' });
+    } catch (error) {
+        console.error("Error verifying repositories:", error);
+        res.status(500).json({ message: error.toString() });
     }
 });
 
