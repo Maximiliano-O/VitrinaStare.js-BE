@@ -2,8 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
-//const userRoute = require("./oldRoutes/user");
-//const repositoryRoute = require("./oldRoutes/repository");
 const commentRoute = require("./routes/comment");
 const emailRouter = require("./routes/emailRouter");
 const statusRoute = require("./routes/status");
@@ -20,8 +18,6 @@ const port = process.env.PORT || 9000;
 // middlewares
 app.use(cors());
 app.use(express.json());
-//app.use("/api", userRoute);
-//app.use("/api", repositoryRoute);
 app.use("/api", commentRoute);
 app.use("/api", emailRouter);
 app.use("/api", statusRoute);
@@ -37,8 +33,7 @@ app.get("/", (req, res) => {
 
 // mongodb connection
 mongoose
-  //.connect(process.env.MONGODB_URI)
-  .connect('mongodb://0.0.0.0:27017/stare')
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log("Connected to MongoDB Atlas"))
   .catch((error) => console.error(error));
 
