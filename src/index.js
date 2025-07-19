@@ -26,6 +26,14 @@ app.use("/api", repoV2Route);
 app.use("/api", userV2Route);
 app.use("/api", githubRoute);
 
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  next();
+});
+
+
 // routes
 app.get("/", (req, res) => {
   res.send("Welcome to my API");
