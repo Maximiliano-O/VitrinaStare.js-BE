@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for routes/repoV2.js</title>
+    <title>Code coverage report for routes/repository.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">routes</a> repoV2.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">routes</a> repository.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -324,16 +324,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">const express = require("express");
-const repoV2Schema = require("../models/repoV2");
+const repositorySchema = require("../models/repository");
 &nbsp;
 &nbsp;
 &nbsp;
 const router = express.Router();
 &nbsp;
 // create repo
-router.post("/repoV2", (req, res) =&gt; {
-  const repoV2 = repoV2Schema(req.body);
-    repoV2
+router.post("/repository", (req, res) =&gt; {
+  const repository = repositorySchema(req.body);
+    repository
       .save()
       .then((data) =&gt; res.json(data))
       .catch(<span class="fstat-no" title="function not covered" >(e</span>rror) =&gt; {
@@ -343,24 +343,24 @@ router.post("/repoV2", (req, res) =&gt; {
 });
 &nbsp;
 // get all repos
-router.get("/repoV2", (req, res) =&gt; {
-    repoV2Schema
+router.get("/repository", (req, res) =&gt; {
+    repositorySchema
     .find()
     .then((data) =&gt; res.json(data))
     .catch(<span class="fstat-no" title="function not covered" >(e</span>rror) =&gt; <span class="cstat-no" title="statement not covered" >res.json({ message: error }))</span>;
 });
 &nbsp;
 // get a repo
-router.get("/repoV2/:id", (req, res) =&gt; {
+router.get("/repository/:id", (req, res) =&gt; {
   const { id } = req.params;
-    repoV2Schema
+    repositorySchema
     .findById(id)
     .then((data) =&gt; res.json(data))
     .catch(<span class="fstat-no" title="function not covered" >(e</span>rror) =&gt; <span class="cstat-no" title="statement not covered" >res.json({ message: error }))</span>;
 });
 &nbsp;
 router.get("/unique-tags", (req, res) =&gt; {
-    repoV2Schema
+    repositorySchema
         .aggregate([
             { $unwind: "$tags" },
             { $group: { _id: null, uniqueTags: { $addToSet: "$tags" } } },
@@ -371,51 +371,51 @@ router.get("/unique-tags", (req, res) =&gt; {
 &nbsp;
 &nbsp;
 // add or edit rating to a repository
-router.post("/repoV2/:id/ratings", (req, res) =&gt; {
+router.post("/repository/:id/ratings", (req, res) =&gt; {
     const { id } = req.params;
     const { userId, rating } = req.body;
 &nbsp;
-    repoV2Schema.findById(id)
-        .then((repoV2) =&gt; {
+    repositorySchema.findById(id)
+        .then((repository) =&gt; {
             // Remove the rating if it already exists
-            const existingIndex = repoV2.ratings.findIndex(r =&gt; r.userId === userId);
+            const existingIndex = repository.ratings.findIndex(r =&gt; r.userId === userId);
             <span class="missing-if-branch" title="else path not taken" >E</span>if (existingIndex !== -1) {
-                repoV2.ratings.splice(existingIndex, 1);
+                repository.ratings.splice(existingIndex, 1);
             }
 &nbsp;
             // Push a new rating
-            repoV2.ratings.push({ userId, rating });
+            repository.ratings.push({ userId, rating });
 &nbsp;
             // Calculate the new total rating
-            const totalRating = repoV2.ratings.reduce((total, r) =&gt; total + r.rating, 0);
-            repoV2.totalRating = totalRating / repoV2.ratings.length;
+            const totalRating = repository.ratings.reduce((total, r) =&gt; total + r.rating, 0);
+            repository.totalRating = totalRating / repository.ratings.length;
 &nbsp;
             // Save the changes
-            return repoV2.save();
+            return repository.save();
         })
         .then(<span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >res.json({ message: 'Rating added or updated!' }))</span>
         .catch((error) =&gt; res.json({ message: error.toString() }));
 });
 // delete rating to a repository
-router.delete("/repoV2/:id/ratings", (req, res) =&gt; {
+router.delete("/repository/:id/ratings", (req, res) =&gt; {
     const { id } = req.params;
     const { userId } = req.body;
 &nbsp;
-    repoV2Schema.findById(id)
-        .then((repoV2) =&gt; {
+    repositorySchema.findById(id)
+        .then((repository) =&gt; {
             // Find the index of the rating
-            const existingIndex = repoV2.ratings.findIndex(r =&gt; r.userId === userId);
+            const existingIndex = repository.ratings.findIndex(r =&gt; r.userId === userId);
 &nbsp;
             // If the rating exists, remove it
             <span class="missing-if-branch" title="else path not taken" >E</span>if (existingIndex !== -1) {
-                repoV2.ratings.splice(existingIndex, 1);
+                repository.ratings.splice(existingIndex, 1);
 &nbsp;
                 // Calculate the new total rating
-                const totalRating = repoV2.ratings.reduce(<span class="fstat-no" title="function not covered" >(t</span>otal, r) =&gt; <span class="cstat-no" title="statement not covered" >total + r.rating,</span> 0);
-                repoV2.totalRating = repoV2.ratings.length &gt; 0 ? <span class="branch-0 cbranch-no" title="branch not covered" >totalRating / repoV2.ratings.length </span>: 0;
+                const totalRating = repository.ratings.reduce(<span class="fstat-no" title="function not covered" >(t</span>otal, r) =&gt; <span class="cstat-no" title="statement not covered" >total + r.rating,</span> 0);
+                repository.totalRating = repository.ratings.length &gt; 0 ? <span class="branch-0 cbranch-no" title="branch not covered" >totalRating / repository.ratings.length </span>: 0;
 &nbsp;
                 // Save the changes
-                return repoV2.save();
+                return repository.save();
             }
         })
         .then(<span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >res.json({ message: 'Rating deleted!' }))</span>
@@ -423,26 +423,26 @@ router.delete("/repoV2/:id/ratings", (req, res) =&gt; {
 });
 &nbsp;
 //return all rating
-router.get("/repoV2/:id/ratings", (req, res) =&gt; {
+router.get("/repository/:id/ratings", (req, res) =&gt; {
     const { id } = req.params;
-    repoV2Schema
+    repositorySchema
         .findById(id)
-        .then((repoV2) =&gt; {
-            <span class="missing-if-branch" title="if path not taken" >I</span>if (!repoV2) {
+        .then((repository) =&gt; {
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (!repository) {
 <span class="cstat-no" title="statement not covered" >                return res.status(404).json({message: `No repository found with id: ${id}`});</span>
             }
-            res.json(repoV2.ratings);
+            res.json(repository.ratings);
         })
         .catch(<span class="fstat-no" title="function not covered" >(e</span>rror) =&gt; <span class="cstat-no" title="statement not covered" >res.status(500).json({ message: error.toString() }))</span>;
 });
 &nbsp;
 // update a repo
-router.put("/repoV2/:id", async (req, res) =&gt; {
+router.put("/repository/:id", async (req, res) =&gt; {
     const { id } = req.params;
     const updateUser = req.body;
 &nbsp;
     try {
-        const updatedUser = await repoV2Schema.findOneAndUpdate(
+        const updatedUser = await repositorySchema.findOneAndUpdate(
             { _id: id },
             { $set: updateUser },
             { new: true }

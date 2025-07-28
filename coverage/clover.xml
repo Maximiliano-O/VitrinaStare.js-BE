@@ -18,7 +18,7 @@
         <line num="4" count="1" type="stmt"/>
         <line num="81" count="1" type="stmt"/>
       </file>
-      <file name="repoV2.js" path="C:\Users\soyel\Github\Stare\Stare-BE\src\models\repoV2.js">
+      <file name="repository.js" path="C:\Users\soyel\Github\Stare\Stare-BE\src\models\repository.js">
         <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="5" count="1" type="stmt"/>
@@ -137,7 +137,7 @@
         <line num="117" count="0" type="stmt"/>
         <line num="121" count="1" type="stmt"/>
       </file>
-      <file name="repoV2.js" path="C:\Users\soyel\Github\Stare\Stare-BE\src\routes\repoV2.js">
+      <file name="repository.js" path="C:\Users\soyel\Github\Stare\Stare-BE\src\routes\repository.js">
         <metrics statements="62" coveredstatements="52" conditionals="8" coveredconditionals="4" methods="28" coveredmethods="20"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>

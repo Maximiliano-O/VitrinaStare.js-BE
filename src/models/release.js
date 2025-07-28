@@ -1,81 +1,48 @@
-const mongoose = require("mongoose");
-const repoStatusSchema = require('./status');
-const Schema = mongoose.Schema;
-const releaseSchema = mongoose.Schema({
- // id: {
- //   type: String,
- //   required: true,
- //   unique: true,
- // },
-  //tag_name: {
-  //  type: String,
-  //  required: true,
-  //},
+import mongoose from "mongoose";
+import { verificationSchema } from "./verification.js";
 
+// Schema for individual releases linked to a repository
+const releaseSchema = new mongoose.Schema({
+  // ID of the associated repository
   repositoryID: {
     type: String,
     required: true,
   },
+
+  // Name or label for this release (e.g., "v1.0", "Initial draft")
   name: {
     type: String,
     required: true,
   },
+
+  // Optional description of the release (changes, notes, etc.)
   description: {
     type: String,
-    default: '',
+    default: "",
   },
+
+  // Date when the release was created (manual override)
   created_at: {
     type: Date,
     default: Date.now,
   },
 
+  // Link to a live CodeSandbox instance for this release
   codesandbox_URL: {
     type: String,
-    default: '',
+    default: "",
   },
 
+  // Whether this release has been verified by an admin or reviewer
   verified: {
     type: Boolean,
     required: true,
     default: false,
   },
-  statuses: [repoStatusSchema],
 
-  //statuses: {
-  //  type: [repoStatusSchema], // This line means that 'statuses' is an array of 'statusSchema' objects
-  //  default: []
-  //}
+  // List of individual verification attempts and results
+  statuses: [verificationSchema],
 
-  //totalComments: {
-  //  type: Number,
-  //  default: 0,
-  //},
-  //totalRating: {
-  //  type: Number,
-  //  default: 0,
-  //  min: 0,
-  //  max: 5,
-  //},
-  //downloads: {
-  //  type: Number,
-  //  default: 0,
-  //},
-  //finalStatus: {
-  //  type: repoStatusSchema.schema,
-  //  default: () => new mongoose.model("RepoStatus", repoStatusSchema)(),
-  //},
-  //statuses: [
-  //  {
-  //    type: repoStatusSchema.schema
-  //  }
-  //],
-  //comments: [
-   // {
-   //   type: Schema.Types.ObjectId,
-   //   ref: "Comment",
-    //},
-  //],
-});
+}, { timestamps: true });
 
-
-module.exports = mongoose.model('Release', releaseSchema);
+export default mongoose.model("Release", releaseSchema);

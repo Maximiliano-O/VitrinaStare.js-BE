@@ -1,7 +1,7 @@
 const sinon = require('sinon');
 const supertest = require('supertest');
-const repoV2Schema = require('../../src/models/repoV2');
-const router = require('../../src/routes/repoV2');
+const repositorySchema = require('../../src/models/repository');
+const router = require('../../src/routes/repository');
 const express = require('express');
 const app = express()
 
@@ -24,39 +24,39 @@ const fakeData = {
     repositoryUrl: 'http://example.com/repo1'
 };
 
-describe('RepoV2 Routes', () => {
+describe('repository Routes', () => {
 
     afterEach(() => {
         sinon.restore();
     });
 
-    it('POST /repoV2', async () => {
-        const stubSave = sinon.stub(repoV2Schema.prototype, 'save').resolves(fakeData);
-        const res = await supertest(app).post('/repoV2').send(fakeData);
+    it('POST /repository', async () => {
+        const stubSave = sinon.stub(repositorySchema.prototype, 'save').resolves(fakeData);
+        const res = await supertest(app).post('/repository').send(fakeData);
 
         expect(res.status).toEqual(200);
         expect(stubSave.calledOnce).toEqual(true);
     });
 
-    it('GET /repoV2', async () => {
-        const repoStub = sinon.stub(repoV2Schema, 'find').resolves([fakeData]);
-        const res = await supertest(app).get('/repoV2');
+    it('GET /repository', async () => {
+        const repoStub = sinon.stub(repositorySchema, 'find').resolves([fakeData]);
+        const res = await supertest(app).get('/repository');
 
         expect(res.status).toEqual(200);
         expect(repoStub.calledOnce).toEqual(true);
     });
 
-    it('GET /repoV2/:id', async () => {
-        const repoStub = sinon.stub(repoV2Schema, 'findById').resolves(fakeData);
-        const res = await supertest(app).get('/repoV2/id1');
+    it('GET /repository/:id', async () => {
+        const repoStub = sinon.stub(repositorySchema, 'findById').resolves(fakeData);
+        const res = await supertest(app).get('/repository/id1');
 
         expect(res.status).toEqual(200);
         expect(repoStub.calledOnce).toEqual(true);
     });
 
-    it('PUT /repoV2/:id', async () => {
-        const updateStub = sinon.stub(repoV2Schema, 'findOneAndUpdate').resolves(fakeData);
-        const res = await supertest(app).put('/repoV2/id1').send(fakeData);
+    it('PUT /repository/:id', async () => {
+        const updateStub = sinon.stub(repositorySchema, 'findOneAndUpdate').resolves(fakeData);
+        const res = await supertest(app).put('/repository/id1').send(fakeData);
 
         expect(res.status).toEqual(200);
         expect(JSON.parse(res.text)).toMatchObject(fakeData);
@@ -64,32 +64,32 @@ describe('RepoV2 Routes', () => {
     });
 
     it('GET /unique-tags', async () => {
-        const uniqueTagStub = sinon.stub(repoV2Schema, 'aggregate').resolves([fakeData.tags]);
+        const uniqueTagStub = sinon.stub(repositorySchema, 'aggregate').resolves([fakeData.tags]);
         const res = await supertest(app).get('/unique-tags');
 
         expect(res.status).toEqual(200);
         expect(uniqueTagStub.calledOnce).toEqual(true);
     });
 
-    it('POST /repoV2/:id/ratings', async () => {
-        const ratingStub = sinon.stub(repoV2Schema, 'findById').resolves(fakeData);
-        const res = await supertest(app).post('/repoV2/id1/ratings').send({ userId: 'user1', rating: 4 });
+    it('POST /repository/:id/ratings', async () => {
+        const ratingStub = sinon.stub(repositorySchema, 'findById').resolves(fakeData);
+        const res = await supertest(app).post('/repository/id1/ratings').send({ userId: 'user1', rating: 4 });
 
         expect(res.status).toEqual(200);
         expect(ratingStub.calledOnce).toEqual(true);
     });
 
-    it('DELETE /repoV2/:id/ratings', async () => {
-        const ratingStub = sinon.stub(repoV2Schema, 'findById').resolves(fakeData);
-        const res = await supertest(app).delete('/repoV2/id1/ratings').send({ userId: 'user1' });
+    it('DELETE /repository/:id/ratings', async () => {
+        const ratingStub = sinon.stub(repositorySchema, 'findById').resolves(fakeData);
+        const res = await supertest(app).delete('/repository/id1/ratings').send({ userId: 'user1' });
 
         expect(res.status).toEqual(200);
         expect(ratingStub.calledOnce).toEqual(true);
     });
 
-    it('GET /repoV2/:id/ratings', async () => {
-        const ratingStub = sinon.stub(repoV2Schema, 'findById').resolves(fakeData);
-        const res = await supertest(app).get('/repoV2/id1/ratings');
+    it('GET /repository/:id/ratings', async () => {
+        const ratingStub = sinon.stub(repositorySchema, 'findById').resolves(fakeData);
+        const res = await supertest(app).get('/repository/id1/ratings');
 
         expect(res.status).toEqual(200);
         expect(ratingStub.calledOnce).toEqual(true);

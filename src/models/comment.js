@@ -1,56 +1,48 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const commentSchema = mongoose.Schema({
-    authorID: {
-        type: String,
-        required: true
-    },
-    repositoryID: {
-        type: String,
-        required: true
-    },
-    //releaseID: {
-    // type: String,
-    // required: true
-    // },
-    // releaseTag: {
-    //   type: String,
-    //   required: true
-    // },
-    repoName: {
-        type: String,
-        required: true
-    },
-    username: {
-        type: String,
-        required: true
-    },
-    usernameImageURL: {
-        type: String
-    },
-    date: {
-        type: Date,
-        default: Date.now
-    },
-//  rating: {
-//    type: Number,
-//    min: 1, max: 5
+// Schema for individual comments linked to a repository
+const commentSchema = new mongoose.Schema({
+  // ID of the user who wrote the comment
+  userID: {
+    type: String,
+    required: true,
+  },
 
-    //},
+  // ID of the repository the comment is associated with
+  repositoryID: {
+    type: String,
+    required: true,
+  },
 
-    //title: {
-    //  type: String,
-    //   required: true
-    // },
-    body: {
-        type: String,
-        required: true
-    },
+  // Name of the repository
+  repoName: {
+    type: String,
+    required: true,
+  },
 
+  // Display username of the commenter
+  username: {
+    type: String,
+    required: true,
+  },
 
+  // Optional profile picture or avatar URL for the commenter
+  usernameImageURL: {
+    type: String,
+    default: "",
+  },
 
+  // Date the comment was posted
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 
+  // Actual text content of the comment
+  body: {
+    type: String,
+    required: true,
+  },
+}, { timestamps: true });
 
-});
-
-module.exports = mongoose.model('Comment', commentSchema);
+export default mongoose.model("Comment", commentSchema);
