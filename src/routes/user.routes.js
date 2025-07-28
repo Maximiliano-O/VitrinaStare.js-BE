@@ -8,11 +8,27 @@ const router = express.Router();
 
 // ============================== CRUD ====================================== //
 
+const ADMIN_EMAIL="vitrina.stare@gmail.com"
+
 // Create user
 router.post("/users", async (req, res) => {
   try {
+    const { email } = req.body;
+
+    // Force role assignment based on email
+    if (email && email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+      req.body.role = "admin";
+    } else {
+      req.body.role = "user"; // just in case someone tries to inject role in the request
+    }
+
     const user = new userSchema(req.body);
     const savedUser = await user.save();
+
+    // Remove password before sending back the response
+    const userResponse = savedUser.toObject();
+    delete userResponse.password;
+    
     return sendResponse(res, 201, "User created successfully.", savedUser);
   } catch (error) {
     return sendResponse(res, 500, "Failed to create user.", error);
@@ -105,7 +121,7 @@ router.get("/users/:id/urlGithubProfile", async (req, res) => {
   try {
     const user = await userSchema.findById(id, "urlGithubProfile");
     if (user) {
-      return sendResponse(res, 200, "GitHub profile URL retrieved successfully.", user);
+      return sendResponse(res, 200, "GitHub profile URL retrieved successfully.", user.urlGithubProfile);
     } else {
       return sendResponse(res, 404, "User not found.");
     }

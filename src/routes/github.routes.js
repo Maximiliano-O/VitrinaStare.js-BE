@@ -36,15 +36,15 @@ router.get("/checkUserExists/:userUrl", async (req, res) => {
   const username = extractUsername(req.params.userUrl);
 
   if (!username) {
-    return sendResponse(res, 400, { success: false, message: "Invalid GitHub user URL." });
+    return sendResponse(res, 400, "Invalid GitHub user URL.", { success: false });
   }
 
   try {
     const response = await axios.get(`https://api.github.com/users/${username}`);
-    return sendResponse(res, 200, { success: true, exists: true, userData: response.data });
+    return sendResponse(res, 200, "The user exists.", { success: true, exists: true, userData: response.data });
   } catch (error) {
     if (error.response?.status === 404) {
-      return sendResponse(res, 200, { success: true, exists: false });
+      return sendResponse(res, 200, "User not found/doesn't exist",{ success: true, exists: false });
     }
     return sendResponse(res, 500, { success: false, message: error.message });
   }
@@ -56,17 +56,17 @@ router.get("/checkRepoExistsAndMatchesUser/:userUrl/:repoUrl", async (req, res) 
   const repoName = extractRepoName(req.params.repoUrl, username);
 
   if (!username || !repoName) {
-    return sendResponse(res, 400, { success: false, message: "Invalid GitHub user or repository URL." });
+    return sendResponse(res, 400, "Invalid GitHub user or repository URL.", { success: false });
   }
 
   try {
     const response = await axios.get(`https://api.github.com/repos/${username}/${repoName}`);
-    return sendResponse(res, 200, { success: true, exists: true, repoData: response.data });
+    return sendResponse(res, 200, "User is owner of the repository." ,{ success: true, exists: true, repoData: response.data });
   } catch (error) {
     if (error.response?.status === 404) {
-      return sendResponse(res, 200, { success: true, exists: false });
+      return sendResponse(res, 200, "User is not owner of the repo.",{ success: true, exists: false });
     }
-    return sendResponse(res, 500, { success: false, message: error.message });
+    return sendResponse(res, 500, "Failed to check repository existance and owner.",{ success: false, message: error.message });
   }
 });
 
