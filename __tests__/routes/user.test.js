@@ -1,11 +1,11 @@
-const sinon = require('sinon');
-const bcrypt = require('bcrypt');
-const supertest = require('supertest');
-const userSchema = require('../../src/models/user');
-const router = require('../../src/routes/user');
-const express = require('express');
-const app = express();
+import sinon from 'sinon';
+import bcrypt from 'bcrypt';
+import supertest from 'supertest';
+import userSchema from '../../src/models/user.js';
+import router from '../../src/routes/user.routes.js';
+import express from 'express';
 
+const app = express();
 app.use(express.json());
 app.use('/', router);
 
@@ -45,9 +45,9 @@ describe('User Routes', () => {
 */
     it('POST /users', async () => {
         const stubSave = sinon.stub(userSchema.prototype, 'save').resolves(fakeUser);
-       const res = await supertest(app).post('/users').send(fakeUser);
+        const res = await supertest(app).post('/users').send(fakeUser);
 
-    /  expect(res.status).toEqual(200);
+        expect(res.status).toEqual(201);
         expect(stubSave.calledOnce).toEqual(true);
     });
 
@@ -66,7 +66,7 @@ describe('User Routes', () => {
     });
 
     it('DELETE /users/:id', async () => {
-        sinon.stub(userSchema, 'remove').resolves({ deletedCount: 1 });
+        sinon.stub(userSchema, 'findByIdAndDelete').resolves({ deletedCount: 1 });
         const res = await supertest(app).delete('/users/id1');
 
         expect(res.status).toEqual(200);
@@ -129,6 +129,6 @@ describe('User Routes', () => {
         const res = await supertest(app).post('/users').send(fakeUser);
 
         expect(res.status).toEqual(500);
-        expect(res.body.message).toEqual(errorMessage);
+        expect(res.body.message).toEqual("Failed to create user.");
     });
 });

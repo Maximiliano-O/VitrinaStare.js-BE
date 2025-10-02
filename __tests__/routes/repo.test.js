@@ -1,8 +1,8 @@
-const sinon = require('sinon');
-const supertest = require('supertest');
-const repositorySchema = require('../../src/models/repository');
-const router = require('../../src/routes/repository');
-const express = require('express');
+import sinon from 'sinon';
+import supertest from 'supertest';
+import repositorySchema from '../../src/models/repository.js';
+import router from '../../src/routes/repository.routes.js';
+import express from 'express';
 const app = express()
 
 app.use(express.json());
@@ -34,7 +34,7 @@ describe('repository Routes', () => {
         const stubSave = sinon.stub(repositorySchema.prototype, 'save').resolves(fakeData);
         const res = await supertest(app).post('/repository').send(fakeData);
 
-        expect(res.status).toEqual(200);
+        expect(res.status).toEqual(201);
         expect(stubSave.calledOnce).toEqual(true);
     });
 
@@ -59,7 +59,7 @@ describe('repository Routes', () => {
         const res = await supertest(app).put('/repository/id1').send(fakeData);
 
         expect(res.status).toEqual(200);
-        expect(JSON.parse(res.text)).toMatchObject(fakeData);
+        expect(res.body.result).toMatchObject(fakeData);
         expect(updateStub.calledOnce).toEqual(true);
     });
 
@@ -72,7 +72,12 @@ describe('repository Routes', () => {
     });
 
     it('POST /repository/:id/ratings', async () => {
-        const ratingStub = sinon.stub(repositorySchema, 'findById').resolves(fakeData);
+        const fakeRepoDoc = {
+            ...fakeData,
+            ratings: [{ userId: 'user1', rating: 4 }],
+            save: sinon.stub().resolvesThis()
+        };
+        const ratingStub = sinon.stub(repositorySchema, 'findById').resolves(fakeRepoDoc);
         const res = await supertest(app).post('/repository/id1/ratings').send({ userId: 'user1', rating: 4 });
 
         expect(res.status).toEqual(200);
@@ -80,7 +85,12 @@ describe('repository Routes', () => {
     });
 
     it('DELETE /repository/:id/ratings', async () => {
-        const ratingStub = sinon.stub(repositorySchema, 'findById').resolves(fakeData);
+        const fakeRepoDoc = {
+            ...fakeData,
+            ratings: [{ userId: 'user1', rating: 4 }],
+            save: sinon.stub().resolvesThis()
+        };
+        const ratingStub = sinon.stub(repositorySchema, 'findById').resolves(fakeRepoDoc);
         const res = await supertest(app).delete('/repository/id1/ratings').send({ userId: 'user1' });
 
         expect(res.status).toEqual(200);

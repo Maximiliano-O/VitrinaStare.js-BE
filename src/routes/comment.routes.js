@@ -53,7 +53,7 @@ router.get("/comments/repository/:repositoryID", async (req, res) => {
 // Get comments by author ID
 router.get("/comments/user/:userID", async (req, res) => {
   try {
-    const comments = await commentSchema.find({ authorID: req.params.authorID });
+    const comments = await commentSchema.find({ authorID: req.params.userID  });
     return sendResponse(res, 200, "Comments by user ID retrieved successfully.", comments);
   } catch (error) {
     return sendResponse(res, 500, "Failed to retrieve comments by author.", error);

@@ -1,8 +1,8 @@
-const sinon = require('sinon');
-const supertest = require('supertest');
-const releaseSchema = require('../../src/models/release');
-const router = require('../../src/routes/release');
-const express = require('express');
+import sinon from 'sinon';
+import supertest from 'supertest';
+import releaseSchema from '../../src/models/release.js';
+import router from '../../src/routes/release.routes.js';
+import express from 'express';
 const app = express()
 
 app.use(express.json());
@@ -28,7 +28,7 @@ describe('Release Routes', () => {
         const stubSave = sinon.stub(releaseSchema.prototype, 'save').resolves(fakeData);
         const res = await supertest(app).post('/release').send(fakeData);
 
-        expect(res.status).toEqual(200);
+        expect(res.status).toEqual(201);
         expect(stubSave.calledOnce).toEqual(true);
     });
 
@@ -57,7 +57,7 @@ describe('Release Routes', () => {
     });
 
     it('DELETE /release/:id', async () => {
-        const releaseStub = sinon.stub(releaseSchema, 'remove').resolves(fakeData);
+        const releaseStub = sinon.stub(releaseSchema, 'deleteOne').resolves(fakeData);
         const res = await supertest(app).delete('/release/id1');
 
         expect(res.status).toEqual(200);
@@ -73,7 +73,12 @@ describe('Release Routes', () => {
     });
 
     it('POST /releases/:id/statuses', async () => {
-        const releaseStub = sinon.stub(releaseSchema, 'findById').resolves(fakeData);
+        const fakeMongooseDoc = {
+            ...fakeData,
+            statuses: [],
+            save: sinon.stub().resolvesThis()
+        };
+        const releaseStub = sinon.stub(releaseSchema, 'findById').resolves(fakeMongooseDoc);
         const res = await supertest(app).post('/releases/id1/statuses').send(fakeData);
 
         expect(res.status).toEqual(200);
