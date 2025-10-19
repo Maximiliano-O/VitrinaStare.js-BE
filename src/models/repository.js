@@ -66,7 +66,7 @@ const repositorySchema = new mongoose.Schema({
   // Internal name of the repository
   repositoryName: {
     type: String,
-    required: true,
+    default: "",
   },
 
   // Short description of the repository
