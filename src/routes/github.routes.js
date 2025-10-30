@@ -9,7 +9,7 @@ const router = express.Router();
  */
 function extractUsername(url) {
   try {
-    const parsed = new URL(decodeURIComponent(url));
+    const parsed = new URL(url);
     if (parsed.hostname !== "github.com") return null;
     return parsed.pathname.split("/")[1] || null;
   } catch {
@@ -22,7 +22,7 @@ function extractUsername(url) {
  */
 function extractRepoName(url, username) {
   try {
-    const parsed = new URL(decodeURIComponent(url));
+    const parsed = new URL(url);
     if (parsed.hostname !== "github.com") return null;
     const pathParts = parsed.pathname.split("/");
     return pathParts.length >= 3 && pathParts[1] === username ? pathParts[2] : null;
@@ -31,9 +31,12 @@ function extractRepoName(url, username) {
   }
 }
 
+// -----------------------
 // Check if GitHub user exists
-router.get("/checkUserExists/:userUrl", async (req, res) => {
-  const username = extractUsername(req.params.userUrl);
+// -----------------------
+router.get("/checkUserExists", async (req, res) => {
+  const { userUrl } = req.query;
+  const username = extractUsername(userUrl);
 
   if (!username) {
     return sendResponse(res, 400, "Invalid GitHub user URL.", { success: false });
@@ -44,16 +47,19 @@ router.get("/checkUserExists/:userUrl", async (req, res) => {
     return sendResponse(res, 200, "The user exists.", { success: true, exists: true, userData: response.data });
   } catch (error) {
     if (error.response?.status === 404) {
-      return sendResponse(res, 200, "User not found/doesn't exist",{ success: true, exists: false });
+      return sendResponse(res, 200, "User not found/doesn't exist", { success: true, exists: false });
     }
     return sendResponse(res, 500, { success: false, message: error.message });
   }
 });
 
+// -----------------------
 // Check if GitHub repo exists and belongs to user
-router.get("/checkRepoExistsAndMatchesUser/:userUrl/:repoUrl", async (req, res) => {
-  const username = extractUsername(req.params.userUrl);
-  const repoName = extractRepoName(req.params.repoUrl, username);
+// -----------------------
+router.get("/checkRepoExistsAndMatchesUser", async (req, res) => {
+  const { userUrl, repoUrl } = req.query;
+  const username = extractUsername(userUrl);
+  const repoName = extractRepoName(repoUrl, username);
 
   if (!username || !repoName) {
     return sendResponse(res, 400, "Invalid GitHub user or repository URL.", { success: false });
@@ -61,13 +67,15 @@ router.get("/checkRepoExistsAndMatchesUser/:userUrl/:repoUrl", async (req, res) 
 
   try {
     const response = await axios.get(`https://api.github.com/repos/${username}/${repoName}`);
-    return sendResponse(res, 200, "User is owner of the repository." ,{ success: true, exists: true, repoData: response.data });
+    return sendResponse(res, 200, "User is owner of the repository.", { success: true, exists: true, repoData: response.data });
   } catch (error) {
     if (error.response?.status === 404) {
-      return sendResponse(res, 200, "User is not owner of the repo.",{ success: true, exists: false });
+      return sendResponse(res, 200, "User is not owner of the repo.", { success: true, exists: false });
     }
-    return sendResponse(res, 500, "Failed to check repository existance and owner.",{ success: false, message: error.message });
+    return sendResponse(res, 500, "Failed to check repository existance and owner.", { success: false, message: error.message });
   }
 });
 
 export default router;
+export { extractUsername, extractRepoName };
+

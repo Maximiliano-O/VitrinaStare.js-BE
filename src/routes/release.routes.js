@@ -28,15 +28,18 @@ router.get("/release", async (req, res) => {
 });
 
 // Get release by ID
+// GET /release/:id
 router.get("/release/:id", async (req, res) => {
-    const { id } = req.params;
-    try {
-        const release = await releaseSchema.findById(id);
-        return sendResponse(res, 200, "Release retrieved successfully.", release);
-    } catch (error) {
-        return sendResponse(res, 500, "Failed to retrieve release.", error);
-    }
+  try {
+    const release = await releaseSchema.findById(req.params.id);
+    if (!release)
+      return sendResponse(res, 404, "Release not found.");
+    sendResponse(res, 200, "Release retrieved successfully.", release);
+  } catch (err) {
+    sendResponse(res, 500, "Failed to retrieve release.", err);
+  }
 });
+
 
 
 // Get all releases for a repository from repositoryID
@@ -81,28 +84,34 @@ router.put("/release/:id", async (req, res) => {
 
 // Add status to release
 router.post("/releases/:id/statuses", async (req, res) => {
-    try {
-        const release = await releaseSchema.findById(req.params.id);
-        release.statuses.push(req.body);
-        const updated = await release.save();
-        return sendResponse(res, 200, "Status added to release.", updated);
-    } catch (error) {
-        return sendResponse(res, 500, "Failed to add status.", error);
-    }
+  try {
+    const release = await releaseSchema.findById(req.params.id);
+    if (!release)
+      return sendResponse(res, 404, "Release not found.");
+
+    release.statuses.push(req.body);
+    const updated = await release.save();
+    return sendResponse(res, 200, "Status added to release.", updated);
+  } catch (error) {
+    return sendResponse(res, 500, "Failed to add status.", error);
+  }
 });
 
 // Push new status
+// POST /release/:id/status
 router.post("/release/:id/status", async (req, res) => {
-    try {
-        const updated = await releaseSchema.findOneAndUpdate(
-            { _id: req.params.id },
-            { $push: { statuses: req.body } },
-            { new: true }
-        );
-        return sendResponse(res, 200, "Status added to release.", updated);
-    } catch (error) {
-        return sendResponse(res, 500, "Failed to add status to release.", error);
-    }
+  try {
+    const updated = await releaseSchema.findOneAndUpdate(
+      { _id: req.params.id },
+      { $push: { statuses: req.body } },
+      { new: true }
+    );
+    if (!updated)
+      return sendResponse(res, 404, "Release not found.");
+    sendResponse(res, 200, "Status added to release.", updated);
+  } catch (err) {
+    sendResponse(res, 500, "Failed to add status.", err);
+  }
 });
 
 // Get status ID by reviewer
@@ -122,45 +131,70 @@ router.get("/release/:releaseId/:reviewerId/status", async (req, res) => {
 
 // NEEDS REVIEW
 
-// Update specific status inside a release (includes verification logic)
+// Update specific status inside a release (includes verification logic and validations)
 router.put("/release/:id/status/:statusId", async (req, res) => {
-    try {
-        const release = await releaseSchema.findOne({ _id: req.params.id });
-        const status = release.statuses.id(req.params.statusId);
-        status.set(req.body);
+  try {
+    const release = await releaseSchema.findOne({ _id: req.params.id });
+    if (!release)
+      return sendResponse(res, 404, "Release not found.");
 
-        // Case: Mayority rejects the verification
-        const countRejected = release.statuses.reduce(
-            (sum, s) => sum + (s.isReviewed && !s.isSafe ? 1 : 0), 0
-        );
-        if (countRejected > release.statuses.length / 2) {
-            await releaseSchema.deleteOne({ _id: req.params.id });
-            return sendResponse(res, 200, "Release deleted due to majority rejection.");
-        }
+    const status = release.statuses.id(req.params.statusId);
+    if (!status)
+      return sendResponse(res, 404, "Status not found.");
 
-        // Case: Majority aproves the verification
-        const countSafe = release.statuses.reduce((sum, s) => sum + (s.isSafe ? 1 : 0), 0);
-        release.verified = countSafe > release.statuses.length / 2;
+    // Update status fields
+    status.set(req.body);
 
-        const updated = await release.save();
-        return sendResponse(res, 200, "Status updated and verification evaluated.", updated);
-    } catch (error) {
-        return sendResponse(res, 500, "Failed to update status.", error);
+    // ---- Verification logic ----
+    // Count rejected verifications
+    const countRejected = release.statuses.reduce(
+      (sum, s) => sum + (s.isReviewed && !s.isSafe ? 1 : 0),
+      0
+    );
+
+    // Case 1: Majority rejects → delete release
+    if (countRejected > release.statuses.length / 2) {
+      await releaseSchema.deleteOne({ _id: req.params.id });
+      return sendResponse(res, 200, "Release deleted due to majority rejection.");
     }
+
+    // Case 2: Majority approves → mark as verified
+    const countSafe = release.statuses.reduce(
+      (sum, s) => sum + (s.isSafe ? 1 : 0),
+      0
+    );
+    release.verified = countSafe > release.statuses.length / 2;
+
+    const updated = await release.save();
+    return sendResponse(res, 200, "Status updated and verification evaluated.", updated);
+  } catch (err) {
+    return sendResponse(res, 500, "Failed to update status.", err);
+  }
 });
+
 
 
 
 // Get latest verified release of a repository
 router.get("/release/latest/:repositoryID", async (req, res) => {
-    try {
-        const latest = await releaseSchema
-            .findOne({ verified: true, repositoryID: req.params.repositoryID })
-            .sort({ created_at: -1 });
-        return sendResponse(res, 200, "Latest verified release retrieved.", latest);
-    } catch (error) {
-        return sendResponse(res, 500, "Failed to retrieve latest verified release.", error);
+  try {
+    const latest = await releaseSchema
+      .findOne({ verified: true, repositoryID: req.params.repositoryID })
+      .sort({ created_at: -1 });
+
+    if (!latest) {
+      return sendResponse(res, 404, "No verified releases found.");
     }
+
+    return sendResponse(res, 200, "Latest verified release retrieved.", latest);
+  } catch (error) {
+    return sendResponse(
+      res,
+      500,
+      "Failed to retrieve latest verified release.",
+      error
+    );
+  }
 });
 
 export default router;

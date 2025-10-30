@@ -168,7 +168,7 @@ router.get("/users/random/:id/:n", async (req, res) => {
   try {
     const userList = await userSchema.aggregate([
       { $match: { _id: { $ne: mongoose.Types.ObjectId(id) } } },
-      { $sample: { size: parseInt(n) } },
+      { $sample: { size: Number.parseInt(n) } },
     ]);
     return sendResponse(res, 200, "Random user sample retrieved.", userList);
   } catch (error) {

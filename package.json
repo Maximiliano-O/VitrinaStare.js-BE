@@ -7,7 +7,10 @@
   "scripts": {
     "start": "nodemon src/index.js",
     "test": "jest",
-    "coverage": "jest --coverage"
+    "test:unit": "jest tests/unit --coverage",
+    "test:unitRoutes": "jest tests/unit/routes --coverage",
+    "test:integration": "jest tests/integration --coverage",
+    "test:all": "jest --coverage"
   },
   "keywords": [],
   "author": "Maximiliano Ormeño S.",
@@ -29,6 +32,7 @@
     "@babel/preset-env": "^7.28.0",
     "babel-jest": "^30.0.5",
     "jest": "^30.0.5",
+    "mongodb-memory-server": "^10.2.3",
     "nodemon": "^3.1.10",
     "sinon": "^21.0.0",
     "supertest": "^7.1.4"

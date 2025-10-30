@@ -8,18 +8,6 @@ dotenv.config();
 
 const router = express.Router();
 
-// Initialize OAuth2 client with Google API credentials and redirect URI
-const oAuth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.EMAIL_REDIRECT_URI
-);
-
-// Set OAuth2 credentials with the stored refresh token
-oAuth2Client.setCredentials({
-  refresh_token: process.env.EMAIL_REFRESH_TOKEN,
-});
-
 /**
  * POST /send-emails
  * Sends emails to a list of recipients with a repository link.
@@ -40,6 +28,19 @@ router.post("/send-emails", async (req, res) => {
   }
 
   try {
+    // Initialize OAuth2 client inside the handler to avoid
+    // pending promises when importing the module in tests
+    const oAuth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.EMAIL_REDIRECT_URI
+    );
+
+    // Set OAuth2 credentials with the stored refresh token
+    oAuth2Client.setCredentials({
+      refresh_token: process.env.EMAIL_REFRESH_TOKEN,
+    });
+
     // Obtain fresh access token from refresh token
     const accessTokenResponse = await oAuth2Client.getAccessToken();
     const accessToken = accessTokenResponse?.token;
@@ -63,6 +64,10 @@ router.post("/send-emails", async (req, res) => {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         refreshToken: process.env.EMAIL_REFRESH_TOKEN,
         accessToken,
+      },
+      secure: true,
+      tls: {
+        rejectUnauthorized: true, 
       },
     });
 
@@ -91,6 +96,7 @@ router.post("/send-emails", async (req, res) => {
       { failures: failed.map((f) => f.reason?.message) }
     );
   } catch (err) {
+    // Catch any unexpected errors and respond with 500
     console.error("Unexpected error while sending emails:", err);
     return sendResponse(res, 500, "Internal server error.", err);
   }

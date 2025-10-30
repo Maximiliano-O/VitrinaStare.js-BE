@@ -10,11 +10,16 @@ const router = express.Router();
 // Create repository
 router.post("/repository", async (req, res) => {
   try {
+    const { userID, author, title, repositoryUrl } = req.body;
+    if (!userID || !author || !title || !repositoryUrl) {
+      return sendResponse(res, 400, "Missing required fields.");
+    }
+
     const repository = new repositorySchema(req.body);
     const savedRepo = await repository.save();
-    return sendResponse(res, 201, "Repository created successfully", savedRepo);
+    return sendResponse(res, 201, "Repository created successfully.", savedRepo);
   } catch (error) {
-    return sendResponse(res, 500, "Failed to create repository", error);
+    return sendResponse(res, 500, "Failed to create repository.", error);
   }
 });
 
@@ -22,9 +27,9 @@ router.post("/repository", async (req, res) => {
 router.get("/repository", async (req, res) => {
   try {
     const repos = await repositorySchema.find();
-    return sendResponse(res, 200, "Repository list retrieved successfully.", repos);
+    return sendResponse(res, 200, "Repositories retrieved successfully.", repos);
   } catch (error) {
-    return sendResponse(res, 500, "Failed to retrieve repositories", error);
+    return sendResponse(res, 500, "Failed to retrieve repositories.", error);
   }
 });
 
@@ -38,7 +43,7 @@ router.get("/repository/:id", async (req, res) => {
     }
     return sendResponse(res, 200, "Repository retrieved successfully.", repo);
   } catch (error) {
-    return sendResponse(res, 500, "Failed to retrieve repository", error);
+    return sendResponse(res, 500, "Failed to retrieve repository.", error);
   }
 });
 
@@ -56,9 +61,9 @@ router.put("/repository/:id", async (req, res) => {
     if (!updatedRepo) {
       return sendResponse(res, 404, `Repository with ID ${id} not found.`);
     }
-    return sendResponse(res, 200, "Repository updated", updatedRepo);
+    return sendResponse(res, 200, "Repository updated successfully.", updatedRepo);
   } catch (error) {
-    return sendResponse(res, 500, "Failed to update repository", error);
+    return sendResponse(res, 500, "Failed to update repository.", error);
   }
 });
 
@@ -67,9 +72,9 @@ router.get("/repository/user/:userID", async (req, res) => {
   const { userID } = req.params;
   try {
     const repos = await repositorySchema.find({ userID });
-    return sendResponse(res, 200, "Repositories retrieved by user ID", repos);
+    return sendResponse(res, 200, "Repositories retrieved by user ID.", repos);
   } catch (error) {
-    return sendResponse(res, 500, "Failed to retrieve repositories by user ID", error);
+    return sendResponse(res, 500, "Failed to retrieve repositories by user ID.", error);
   }
 });
 
@@ -82,9 +87,9 @@ router.get("/unique-tags", async (req, res) => {
       { $unwind: "$tags" },
       { $group: { _id: null, uniqueTags: { $addToSet: "$tags" } } },
     ]);
-    return sendResponse(res, 200, "Unique tags retrieved", result[0]?.uniqueTags || []);
+    return sendResponse(res, 200, "Unique tags retrieved.", result[0]?.uniqueTags || []);
   } catch (error) {
-    return sendResponse(res, 500, "Failed to retrieve unique tags", error);
+    return sendResponse(res, 500, "Failed to retrieve unique tags.", error);
   }
 });
 
@@ -94,6 +99,10 @@ router.get("/unique-tags", async (req, res) => {
 router.post("/repository/:id/ratings", async (req, res) => {
   const { id } = req.params;
   const { userId, rating } = req.body;
+
+  if (!userId || typeof rating !== "number") {
+    return sendResponse(res, 400, "Missing or invalid rating data.");
+  }
 
   try {
     const repository = await repositorySchema.findById(id);
@@ -108,14 +117,13 @@ router.post("/repository/:id/ratings", async (req, res) => {
 
     repository.ratings.push({ userId, rating });
 
-    const totalRating = repository.ratings.reduce((total, r) => total + r.rating, 0);
+    const totalRating = repository.ratings.reduce((sum, r) => sum + r.rating, 0);
     repository.totalRating = totalRating / repository.ratings.length;
 
     await repository.save();
-
-    return sendResponse(res, 200, "Rating added or updated");
+    return sendResponse(res, 200, "Rating added or updated successfully.", repository);
   } catch (error) {
-    return sendResponse(res, 500, "Failed to add or update rating", error);
+    return sendResponse(res, 500, "Failed to add or update rating.", error);
   }
 });
 
@@ -124,6 +132,10 @@ router.delete("/repository/:id/ratings", async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
 
+  if (!userId) {
+    return sendResponse(res, 400, "Missing userId for rating deletion.");
+  }
+
   try {
     const repository = await repositorySchema.findById(id);
     if (!repository) {
@@ -131,20 +143,21 @@ router.delete("/repository/:id/ratings", async (req, res) => {
     }
 
     const existingIndex = repository.ratings.findIndex((r) => r.userId === userId);
-    if (existingIndex !== -1) {
-      repository.ratings.splice(existingIndex, 1);
-
-      const totalRating = repository.ratings.reduce((total, r) => total + r.rating, 0);
-      repository.totalRating = repository.ratings.length > 0 ? totalRating / repository.ratings.length : 0;
-
-      await repository.save();
-
-      return sendResponse(res, 200, "Rating deleted");
-    } else {
-      return sendResponse(res, 404, "Rating not found for given userId");
+    if (existingIndex === -1) {
+      return sendResponse(res, 404, "Rating not found for given userId.");
     }
+
+    repository.ratings.splice(existingIndex, 1);
+
+    const totalRating = repository.ratings.reduce((sum, r) => sum + r.rating, 0);
+    repository.totalRating = repository.ratings.length > 0
+      ? totalRating / repository.ratings.length
+      : 0;
+
+    await repository.save();
+    return sendResponse(res, 200, "Rating deleted successfully.", repository);
   } catch (error) {
-    return sendResponse(res, 500, "Failed to delete rating", error);
+    return sendResponse(res, 500, "Failed to delete rating.", error);
   }
 });
 
@@ -156,9 +169,9 @@ router.get("/repository/:id/ratings", async (req, res) => {
     if (!repository) {
       return sendResponse(res, 404, `Repository with ID ${id} not found.`);
     }
-    return sendResponse(res, 200, "Ratings retrieved", repository.ratings);
+    return sendResponse(res, 200, "Ratings retrieved successfully.", repository.ratings);
   } catch (error) {
-    return sendResponse(res, 500, "Failed to retrieve ratings", error);
+    return sendResponse(res, 500, "Failed to retrieve ratings.", error);
   }
 });
 
@@ -167,21 +180,21 @@ router.get("/repository/:id/ratings", async (req, res) => {
 // Verify repositories based on verified releases
 router.post("/repository/verify", async (req, res) => {
   try {
-    // Find releases that are verified
     const verifiedReleases = await Release.find({ verified: true });
+    if (!verifiedReleases.length) {
+      return sendResponse(res, 400, "No verified releases found.");
+    }
 
-    const repositoryIDs = verifiedReleases.map((release) => release.repositoryID);
-
-    // Update repositories to verified if they have a verified release and are not already verified
+    const repositoryIDs = verifiedReleases.map((r) => r.repositoryID);
     await repositorySchema.updateMany(
       { _id: { $in: repositoryIDs }, verified: false },
       { $set: { verified: true } }
     );
 
-    return sendResponse(res, 200, "Repositories verified successfully");
+    return sendResponse(res, 200, "Repositories verified successfully.");
   } catch (error) {
     console.error("Error verifying repositories:", error);
-    return sendResponse(res, 500, "Failed to verify repositories", error);
+    return sendResponse(res, 500, "Failed to verify repositories.", error);
   }
 });
 
