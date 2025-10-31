@@ -1,5 +1,5 @@
 /node_modules
 .env*
-/coverage/
+/coverage
 /.scannerwork
 sonar-project.properties

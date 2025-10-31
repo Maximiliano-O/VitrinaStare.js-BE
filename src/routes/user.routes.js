@@ -3,12 +3,14 @@ import userSchema from "../models/user.js";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import sendResponse from "../utils/sendResponse.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const router = express.Router();
 
 // ============================== CRUD ====================================== //
 
-const ADMIN_EMAIL="vitrina.stare@gmail.com"
 
 // Create user
 router.post("/users", async (req, res) => {
@@ -16,7 +18,7 @@ router.post("/users", async (req, res) => {
     const { email } = req.body;
 
     // Force role assignment based on email
-    if (email && email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+    if (email && email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase()) {
       req.body.role = "admin";
     } else {
       req.body.role = "user"; // just in case someone tries to inject role in the request

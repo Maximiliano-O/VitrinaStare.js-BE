@@ -2,6 +2,7 @@ import express from "express";
 import repositorySchema from "../models/repository.js";
 import Release from "../models/release.js";
 import sendResponse from "../utils/sendResponse.js";
+import Comment from "../models/comment.js";
 
 const router = express.Router();
 
@@ -10,9 +11,18 @@ const router = express.Router();
 // Create repository
 router.post("/repository", async (req, res) => {
   try {
-    const { userID, author, title, repositoryUrl } = req.body;
+    const { userID, author, title, repositoryUrl, tags } = req.body;
+
     if (!userID || !author || !title || !repositoryUrl) {
       return sendResponse(res, 400, "Missing required fields.");
+    }
+
+    if (typeof repositoryUrl !== "string") {
+      return sendResponse(res, 400, "repositoryUrl must be a string.");
+    }
+
+    if (tags && !Array.isArray(tags)) {
+      return sendResponse(res, 400, "tags must be an array.");
     }
 
     const repository = new repositorySchema(req.body);
@@ -38,9 +48,7 @@ router.get("/repository/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const repo = await repositorySchema.findById(id);
-    if (!repo) {
-      return sendResponse(res, 404, `Repository with ID ${id} not found.`);
-    }
+    if (!repo) return sendResponse(res, 404, `Repository with ID ${id} not found.`);
     return sendResponse(res, 200, "Repository retrieved successfully.", repo);
   } catch (error) {
     return sendResponse(res, 500, "Failed to retrieve repository.", error);
@@ -58,9 +66,8 @@ router.put("/repository/:id", async (req, res) => {
       { $set: updateData },
       { new: true }
     );
-    if (!updatedRepo) {
-      return sendResponse(res, 404, `Repository with ID ${id} not found.`);
-    }
+
+    if (!updatedRepo) return sendResponse(res, 404, `Repository with ID ${id} not found.`);
     return sendResponse(res, 200, "Repository updated successfully.", updatedRepo);
   } catch (error) {
     return sendResponse(res, 500, "Failed to update repository.", error);
@@ -77,6 +84,21 @@ router.get("/repository/user/:userID", async (req, res) => {
     return sendResponse(res, 500, "Failed to retrieve repositories by user ID.", error);
   }
 });
+
+// Delete a repository and its releases by repository id
+router.delete("/repository/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await Release.deleteMany({ repositoryID: id }); // delete related releases
+    await Comment.deleteMany({ repositoryID: id });
+    const deletedRepo = await repositorySchema.findByIdAndDelete(id); // delete repo
+    if (!deletedRepo) return sendResponse(res, 404, "Repository not found.");
+    return sendResponse(res, 200, "Repository and associated releases deleted.", deletedRepo);
+  } catch (error) {
+    return sendResponse(res, 500, "Failed to delete repository.", error);
+  }
+});
+
 
 // ================================ Tags ==================================== //
 
@@ -104,21 +126,22 @@ router.post("/repository/:id/ratings", async (req, res) => {
     return sendResponse(res, 400, "Missing or invalid rating data.");
   }
 
+  if (rating < 0 || rating > 5) {
+    return sendResponse(res, 400, "Rating must be between 0 and 5.");
+  }
+
   try {
     const repository = await repositorySchema.findById(id);
-    if (!repository) {
-      return sendResponse(res, 404, `Repository with ID ${id} not found.`);
-    }
+    if (!repository) return sendResponse(res, 404, `Repository with ID ${id} not found.`);
+
+    if (!Array.isArray(repository.ratings)) repository.ratings = [];
 
     const existingIndex = repository.ratings.findIndex((r) => r.userId === userId);
-    if (existingIndex !== -1) {
-      repository.ratings.splice(existingIndex, 1);
-    }
+    if (existingIndex !== -1) repository.ratings.splice(existingIndex, 1);
 
     repository.ratings.push({ userId, rating });
 
-    const totalRating = repository.ratings.reduce((sum, r) => sum + r.rating, 0);
-    repository.totalRating = totalRating / repository.ratings.length;
+    repository.totalRating = repository.ratings.reduce((sum, r) => sum + r.rating, 0) / repository.ratings.length;
 
     await repository.save();
     return sendResponse(res, 200, "Rating added or updated successfully.", repository);
@@ -132,26 +155,21 @@ router.delete("/repository/:id/ratings", async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
 
-  if (!userId) {
-    return sendResponse(res, 400, "Missing userId for rating deletion.");
-  }
+  if (!userId) return sendResponse(res, 400, "Missing userId for rating deletion.");
 
   try {
     const repository = await repositorySchema.findById(id);
-    if (!repository) {
-      return sendResponse(res, 404, `Repository with ID ${id} not found.`);
-    }
+    if (!repository) return sendResponse(res, 404, `Repository with ID ${id} not found.`);
+
+    if (!Array.isArray(repository.ratings)) return sendResponse(res, 404, "No ratings found for this repository.");
 
     const existingIndex = repository.ratings.findIndex((r) => r.userId === userId);
-    if (existingIndex === -1) {
-      return sendResponse(res, 404, "Rating not found for given userId.");
-    }
+    if (existingIndex === -1) return sendResponse(res, 404, "Rating not found for given userId.");
 
     repository.ratings.splice(existingIndex, 1);
 
-    const totalRating = repository.ratings.reduce((sum, r) => sum + r.rating, 0);
-    repository.totalRating = repository.ratings.length > 0
-      ? totalRating / repository.ratings.length
+    repository.totalRating = repository.ratings.length
+      ? repository.ratings.reduce((sum, r) => sum + r.rating, 0) / repository.ratings.length
       : 0;
 
     await repository.save();
@@ -166,10 +184,8 @@ router.get("/repository/:id/ratings", async (req, res) => {
   const { id } = req.params;
   try {
     const repository = await repositorySchema.findById(id);
-    if (!repository) {
-      return sendResponse(res, 404, `Repository with ID ${id} not found.`);
-    }
-    return sendResponse(res, 200, "Ratings retrieved successfully.", repository.ratings);
+    if (!repository) return sendResponse(res, 404, `Repository with ID ${id} not found.`);
+    return sendResponse(res, 200, "Ratings retrieved successfully.", repository.ratings || []);
   } catch (error) {
     return sendResponse(res, 500, "Failed to retrieve ratings.", error);
   }
@@ -181,9 +197,7 @@ router.get("/repository/:id/ratings", async (req, res) => {
 router.post("/repository/verify", async (req, res) => {
   try {
     const verifiedReleases = await Release.find({ verified: true });
-    if (!verifiedReleases.length) {
-      return sendResponse(res, 400, "No verified releases found.");
-    }
+    if (!verifiedReleases.length) return sendResponse(res, 400, "No verified releases found.");
 
     const repositoryIDs = verifiedReleases.map((r) => r.repositoryID);
     await repositorySchema.updateMany(
