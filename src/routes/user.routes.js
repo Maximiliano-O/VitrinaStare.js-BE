@@ -11,7 +11,6 @@ const router = express.Router();
 
 // ============================== CRUD ====================================== //
 
-
 // Create user
 router.post("/users", async (req, res) => {
   try {
